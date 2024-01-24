@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 4px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            font-size: 24px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #fff;
+        }
+
+        .cell:hover {
+            background-color: #f2f2f2;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+
+        #refresh-btn,
+        #option-btn {
+            margin-top: 10px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #refresh-btn {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+        }
+
+        #option-btn {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+        }
+
+        #option-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="board"></div>
+<div id="status">Player X's turn</div>
+<button id="refresh-btn" onclick="resetGame()">Refresh</button>
+<div id="option-container">
+    <button id="option-btn" onclick="toggleOption()">Play Against AI</button>
+</div>
+
+<script>
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const optionBtn = document.getElementById('option-btn');
+    const cells = [];
+
+    let currentPlayer = 'X';
+    let boardState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+    let playAgainstAi = false;
+
+    // Event listener for cell clicks
+    function handleCellClick(index) {
+        if (!gameActive || boardState[index] !== '') {
+            return;
+        }
+
+        boardState[index] = currentPlayer;
+        renderBoard();
+        checkWinner();
+
+        if (gameActive) {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            status.textContent = Player ${currentPlayer}'s turn;
+
+            if (playAgainstAi && currentPlayer === 'O') {
+                setTimeout(() => makeAiMove(), 500); // Delay for better user experience
+            }
+        }
+    }
+
+    // Check for a winner or a tie
+    function checkWinner() {
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]              // Diagonals
+        ];
+
+        for (const pattern of winPatterns) {
+            const [a, b, c] = pattern;
+            if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                status.textContent = Player ${currentPlayer} wins!;
+                gameActive = false;
+                return;
+            }
+        }
+
+        if (!boardState.includes('')) {
+            status.textContent = 'It\'s a tie!';
+            gameActive = false;
+        }
+    }
+
+    // Render the game board
+    function renderBoard() {
+        board.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.textContent = boardState[i];
+            cell.addEventListener('click', () => handleCellClick(i));
+            board.appendChild(cell);
+            cells.push(cell);
+        }
+    }
+
+    // AI Move - Random cell selection
+    function makeAiMove() {
+        const emptyCells = cells.filter((cell, index) => boardState[index] === '');
+        if (emptyCells.length > 0) {
+            const randomIndex = Math.floor(Math.random() * emptyCells.length);
+            const aiMoveIndex = cells.indexOf(emptyCells[randomIndex]);
+            handleCellClick(aiMoveIndex);
+        }
+    }
+
+    // Reset the game
+    function resetGame() {
+        currentPlayer = 'X';
+        boardState = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        status.textContent = Player ${currentPlayer}'s turn;
+        renderBoard();
+    }
+
+    // Toggle play against AI option
+    function toggleOption() {
+        playAgainstAi = !playAgainstAi;
+        optionBtn.textContent = playAgainstAi ? 'Play Against Human' : 'Play Against AI';
+        resetGame();
+    }
+
+    renderBoard();
+</script>
+
+</body>
+</html>
